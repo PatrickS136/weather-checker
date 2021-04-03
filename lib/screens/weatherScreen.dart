@@ -9,8 +9,49 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  String location = "Jakarta";
-  DateTime now = new DateTime.now();
+  String location = "JAKARTA";
+  String date = "Loading...";
+  String imageURL = 'https://openweathermap.org/img/wn/10d@2x.png';
+  Map<String, dynamic> results = {
+    "temp": "Loading...",
+    "icon": "Loading...",
+    "id": "Loading...",
+    "description": "Loading...",
+  };
+
+  void setDate() {
+    setState(() {
+      DateTime now = new DateTime.now();
+      date =
+          "${weekdays[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}";
+    });
+  }
+
+  void setLocation(newLocation) {
+    setState(() {
+      location = newLocation;
+      getWeather(location);
+    });
+  }
+
+  void getWeather(String city) async {
+    print("Attempting to get weather data");
+    dynamic newResults = await WeatherBrain().getWeather(location);
+    setState(() {
+      results = newResults;
+      imageURL = 'https://openweathermap.org/img/wn/${results["icon"]}@2x.png';
+    });
+    print("Got weather data");
+    print(results);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setDate();
+    getWeather(location);
+  }
+
   // DateTime date = new DateTime(now.year, now.month, now.day);
   @override
   Widget build(BuildContext context) {
@@ -23,14 +64,21 @@ class _WeatherScreenState extends State<WeatherScreen> {
             children: [
               Center(
                 child: Text(
-                  "Weather",
-                  style: kCityText,
+                  results["description"].toUpperCase(),
+                  style: kDescription,
                 ),
               ),
               SizedBox(
                 height: 30,
               ),
-              Icon(Icons.wb_sunny, size: 160),
+              CircleAvatar(
+                radius: 100,
+                backgroundColor: Colors.lightBlueAccent,
+                child: Image.network(
+                  imageURL,
+                  scale: 0.5,
+                ),
+              ),
               SizedBox(
                 height: 20,
               ),
@@ -43,7 +91,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 height: 20,
               ),
               Text(
-                "Monday, 1 January 2021",
+                date,
                 style: kDateText,
                 textAlign: TextAlign.center,
               ),
@@ -52,7 +100,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
               ),
               Center(
                 child: GradientText(
-                  text: "37°C",
+                  text: "${results["temp"]}°C",
                   style: kTempText,
                   colors: <Color>[blue, lightBlue],
                 ),
@@ -65,7 +113,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
         onPressed: () {
           showModalBottomSheet(
             context: context,
-            builder: (context) => SearchScreen(),
+            builder: (context) => SearchScreen(setLocation: setLocation),
           );
         },
         elevation: 5,

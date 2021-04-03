@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:weather_checker/constants.dart';
 
-class SearchScreen extends StatelessWidget {
-  // String
+class SearchScreen extends StatefulWidget {
+  final Function setLocation;
+  SearchScreen({this.setLocation});
+
+  @override
+  _SearchScreenState createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  String newValue;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,7 +35,12 @@ class SearchScreen extends StatelessWidget {
             TextField(
               autofocus: true,
               textAlign: TextAlign.center,
-              onChanged: null,
+              style: TextStyle(
+                color: Colors.black,
+              ),
+              onChanged: (value) {
+                newValue = value.toUpperCase();
+              },
             ),
             TextButton(
               child: Text(
@@ -34,6 +48,7 @@ class SearchScreen extends StatelessWidget {
                 style: kDateText.copyWith(color: blue),
               ),
               onPressed: () {
+                widget.setLocation(newValue);
                 Navigator.pop(context);
               },
             ),
